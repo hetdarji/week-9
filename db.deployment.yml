@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment
+spec:
+  replicas: 3                               # Number of replicas of the Pods
+  selector:
+    matchLabels:
+      version: v1                           # Label used to match pods
+  template:
+    metadata:
+      labels:
+        env: dev                            # Pod labels
+        version: v1
+    spec:
+      containers:
+        - name: db-deployment
+          image: hetdarji/dbimage          # Container image
+          ports:
+            - containerPort: 3306          # Port exposed by the container
+          envFrom:
+            - configMapRef:
+                name: webapp-configmap
+                optional: false
+            - secretRef:
+                name: webapp-secret
+                optional: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp-configmap
+  labels:
+    app: nginx
+    env: dev
+data:
+  APP_ENV: "dev"
+  APP_NAME: "webserver"
+  APP_TYPE: "proxy"
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webapp-secret
+type: Opaque
+data:
+  SECURITY_TOKEN: c29tZWRi     # base64 of 
+  PASSWORD: c29tZWRi           # base64 of 
+
